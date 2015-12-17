@@ -36,22 +36,35 @@ module.exports = (robot) ->
     now = new Date
     currentHours = undefined
     currentMinutes = undefined
+    currentDay = undefined
     if utc
       currentHours = now.getUTCHours() + parseInt(utc, 10)
       currentMinutes = now.getUTCMinutes()
+      currentDay = now.getUTCDay()
       if currentHours > 23
         currentHours -= 23
     else
       currentHours = now.getHours()
       currentMinutes = now.getMinutes()
-    standupHours = standupTime.split(':')[0]
-    standupMinutes = standupTime.split(':')[1]
+      currentDay = now.getDay()
+
+
+    if standupTime.split(':').length == 3
+      standupDay = standupTime.split(':')[0]
+      index = 1
+    else 
+      standupDay = "0"
+      index = 0
+
+    standupHours = standupTime.split(':')[index]
+    standupMinutes = standupTime.split(':')[index+1]
     try
+      standupDay = parseInt(standupDay, 10)
       standupHours = parseInt(standupHours, 10)
       standupMinutes = parseInt(standupMinutes, 10)
     catch _error
       return false
-    if standupHours == currentHours and standupMinutes == currentMinutes
+    if standupHours == currentHours and standupMinutes == currentMinutes and (standupDay == 0 or standupDay == currentDay)
       return true
     false
 
@@ -157,7 +170,12 @@ module.exports = (robot) ->
     time = msg.match[1]
     room = findRoom(msg)
     saveStandup room, time
-    msg.send 'Ok, from now on I\'ll remind this room to do a standup every weekday at ' + time
+    if time.split(':').length == 3
+      week = time.split(':')[0]
+      timeOfDay = time.split(':')[1]+':'+time.split(':')[2]
+      msg.send 'Ok, from now on I\'ll remind this room to do a standup every ' + week + ' day at ' + timeOfDay
+    else
+      msg.send 'Ok, from now on I\'ll remind this room to do a standup every weekday at ' + time
     return
   robot.respond /create standup ((?:[01]?[0-9]|2[0-4]):[0-5]?[0-9]) UTC([+-]([0-9]|1[0-3]))$/i, (msg) ->
     time = msg.match[1]
