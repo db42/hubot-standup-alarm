@@ -166,7 +166,7 @@ module.exports = (robot) ->
     else
       msg.send 'Deleted your ' + time + ' standup.'
     return
-  robot.respond /create standup ((?:[01]?[0-9]|2[0-4]):[0-5]?[0-9])$/i, (msg) ->
+  robot.respond /create standup ((?:[0-7]:[01]?[0-9]|2[0-4]):[0-5]?[0-9])$/i, (msg) ->
     time = msg.match[1]
     room = findRoom(msg)
     saveStandup room, time
